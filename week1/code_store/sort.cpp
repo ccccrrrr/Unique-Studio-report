@@ -31,13 +31,18 @@ void QuickSort(int* list, int N);
 void quicksort(int* list, int N, int left, int right);
 
 void MergeSort(int* list, int N);
+void mergesort(int* list, int N, int left, int right, int* temp);
+void merge(int* list, int N, int left, int mid, int right, int* temp);
 int main(){
-    int list[] = {9, 77,2,4,5,1,9,10,22,34};
+    int list[] = {9, 77,2,99,5,1,9,10,22,34};
+    int N = 10;
     /** sort
      */
-    //insertsort(list, 8);
-    //HeapSort(list, 8);
-    QuickSort(list, 10);
+
+    //insertsort(list, N);
+    //HeapSort(list, N);
+    //Quicksort(list, N)
+    //MergeSort(list, N);
 
     return 0;
 
@@ -116,7 +121,45 @@ void quicksort(int* list, int N, int left, int right){
 
 
 void MergeSort(int* list, int N){
-
+    if(N <= 0) {
+        printf("error input...\n");
+        return;
+    }
+    int temp[N] = {0};
+    mergesort(list, N, 0, N-1, temp);
+    printf("mergesort output ");
+    printlist(list, N);
+}
+void mergesort(int* list, int N, int left, int right, int* temp){
+    if(left >= right)
+        return;
+    if(left + 1 == right)
+    {
+        if(list[left] > list[right])
+            _swap(&list[left], &list[right]);
+        return;
+    }
+    int mid = (left + right) / 2;
+    mergesort(list, N, left, mid, temp);
+    mergesort(list, N, mid+1, right, temp);
+    merge(list, N, left, mid, right, temp);
+}
+void merge(int* list, int N, int left, int mid, int right, int* temp){
+    int i = left;
+    int j = mid + 1;
+    int ptr = left;
+    while(i <= mid && j <= right){
+        if(list[i] <= list[j])
+            temp[ptr++] = list[i++];
+        else
+            temp[ptr++] = list[j++];
+    }
+    while(i <= mid)
+        temp[ptr++] = list[i++];
+    while(j <= right)
+        temp[ptr++] = list[j++];
+    for(int i = left; i <= right; i++)
+        list[i] = temp[i];
 }
 void _swap(int* a, int *b){
     int temp = *a;
