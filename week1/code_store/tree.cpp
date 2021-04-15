@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <stack>
 using namespace std;
 #define N 10
 struct TreeNode{
@@ -12,12 +13,21 @@ void CreateTree(struct TreeNode * root);
 
 void preOrder_r(struct TreeNode * root);
 void preOrder__(struct TreeNode * root);
+void preOrder_morris(struct TreeNode * root);
 
 void inOrder_r(struct TreeNode * root);
 void inOrder__(struct TreeNode * root);
+void inOrder_morris(struct TreeNode * root);
 
 void postOrder_r(struct TreeNode * root);
 void postOrder__(struct TreeNode * root);
+void postOrder_morris(struct TreeNode * root);
+
+void levelOrder_r(struct TreeNode * root);
+void levelOrder__(struct TreeNode * root);
+
+void bfsTree(struct TreeNode * root);
+void dfsTree(struct TreeNode * root);
 
 int main(){
 
@@ -30,13 +40,35 @@ int main(){
     preOrder_r(root);
     printf("\n");
     preOrder__(root);
+    printf("\n");
+    preOrder_morris(root);
+    printf("\n");
 
     //中序
+    printf("in order using recursion: ");
     inOrder_r(root);
     printf("\n");
+    printf("in order using queue: ");
+    inOrder__(root);
+    printf("\n");
+    inOrder_morris(root);
+    printf("\n");
+
     //后序
     postOrder_r(root);
     printf("\n");
+    postOrder__(root);
+    printf("\n");
+    postOrder_morris(root);
+    printf("\n");
+
+    //层序遍历
+    levelOrder__(root);
+    printf("\n");
+
+    dfsTree(root);
+    printf("\n");
+    bfsTree(root);
 }
 
 void preOrder_r(struct TreeNode * root){
@@ -51,7 +83,52 @@ void preOrder_r(struct TreeNode * root){
     
 }
 void preOrder__(struct TreeNode * root){
+    struct TreeNode * t = root;
+    stack<struct TreeNode *> s;
+    while(t || s.size() != 0){
+        while(t){
+            printf("%d ", t->value);
+            s.push(t);
+            t = t->left;
+        }
+        if(s.size() != 0){
+            t = s.top();
+            s.pop();
+            t = t->right;
+        }
+    }
 
+}
+void preOrder_morris(struct TreeNode * root){
+    if(root == nullptr){
+        printf("error input...\n");
+        return;
+    }
+    printf("preorder morris: ");
+    struct TreeNode * cur = root;
+    struct TreeNode * mostright;
+    while(!(cur->left == nullptr && cur->right == nullptr)){
+        //printf("%d ", cur->value);
+        if(cur->left == nullptr){
+            printf("%d ", cur->value);
+            cur = cur->right;
+        }
+        else{
+            mostright = cur->left;
+            while(mostright->right != nullptr && mostright->right != cur){
+                mostright = mostright->right;
+            }
+            if(mostright->right == nullptr){
+                printf("%d ", cur->value);
+                mostright->right = cur; 
+                cur = cur->left;
+            }
+            else{
+                mostright->right = nullptr;
+                cur = cur->right;
+            }
+        }
+    }
 }
 
 void inOrder_r(struct TreeNode * root){
@@ -63,7 +140,50 @@ void inOrder_r(struct TreeNode * root){
         inOrder_r(root->right);
 }
 void inOrder__(struct TreeNode * root){
-
+    struct TreeNode * t = root;
+    stack<struct TreeNode *> s;
+    while(t || s.size() != 0){
+        while(t){
+            s.push(t);
+            t = t->left;
+        }
+        t = s.top();
+        printf("%d ", t->value);
+        s.pop();
+        t = t->right;
+    }
+}
+void inOrder_morris(struct TreeNode * root){
+    if(root == nullptr){
+        printf("error input...\n");
+        return;
+    }
+    printf("in order morris: ");
+    struct TreeNode * cur = root;
+    struct TreeNode * mostright;
+    while(!(cur->left == nullptr && cur->right == nullptr)){
+        if(cur->left == nullptr){
+            printf("%d ", cur->value);
+            cur = cur->right;
+        }
+        else{
+            mostright = cur->left;
+            while(mostright->right != nullptr && mostright->right != cur){
+                mostright = mostright->right;
+            }
+            if(mostright->right == nullptr){
+                mostright->right = cur;
+                cur = cur->left;
+                continue;
+            }
+            else{
+                mostright->right = nullptr;
+                printf("%d ", cur->value);
+                cur = cur->right;
+            }
+        }
+        //printf("%d ", cur->value);
+    }
 }
 
 void postOrder_r(struct TreeNode * root){
@@ -75,7 +195,116 @@ void postOrder_r(struct TreeNode * root){
     printf("%d ", root->value);
 }
 void postOrder__(struct TreeNode * root){
+    stack<struct TreeNode *> s;
+    struct TreeNode * t = root;
+    struct TreeNode * ptr;
+    while(t || s.size() != 0){
+        while(t){
+            s.push(t);
+            //printf("%d", root->value);
+            t = t->left;
+        }
+        t = s.top();
+        s.pop();
+        if(t->right == nullptr || ptr == t->right){
+            printf("%d ", t->value);
+            ptr = t;
+            t = nullptr;
+        }
+        else{
+            s.push(t);
+            t = t->right;
+        }
+    }
+}
+void postOrder_morris(struct TreeNode * root){
+    //problem reserved
+    struct TreeNode * cur = root;
+    struct TreeNode * mostright;
+    stack<struct TreeNode *> s;
+    while(!(cur->left == nullptr && cur->right == nullptr)){
+        if(cur->left == nullptr){
+            cur = cur->right;
+        }else{
+            mostright = cur->left;
+            //s.push(cur);
+            while(mostright->right != nullptr && mostright->right != cur){
+                mostright = mostright->right;
+            }
+            if(mostright->right == nullptr){
+                mostright->right = cur;
+                cur = cur->left;
+                //s.push(cur);
+            }
+            if(mostright->right == cur){
+                mostright->right = nullptr;
+                //if(cur->right != nullptr)
+                //    s.push(cur->right);
+                s.push(mostright);
+                cur = cur->right;
+                while(s.size() != 0){
+                    printf("%d ", s.top()->value);
+                    s.pop();
+                }
+            }
+        }
+    }
+    printf("%d ", root->value);
+}
 
+void levelOrder_r(struct TreeNode * root){
+    printf("is there any recursive solution...?\n");
+}
+void levelOrder__(struct TreeNode * root){
+    if(root == nullptr) {
+        printf("root is null pointer...\n");
+        return;
+    }
+    printf("level order: ");
+    queue<struct TreeNode *> q;
+    struct TreeNode * t = root;
+    q.push(root);
+    while(q.size() != 0){
+        t = q.front();
+        if(t->left) q.push(t->left);
+        if(t->right) q.push(t->right);
+        printf("%d ", t->value);
+        q.pop(); 
+    }
+}
+
+void dfsTree(struct TreeNode * root){
+    if(root == nullptr){
+        printf("this is a null pointer...\n");
+        return;
+    }
+    printf("dfs: ");
+    stack<struct TreeNode *> s;
+    s.push(root);
+    while(s.size() != 0){
+        printf("%d ", s.top()->value);
+        struct TreeNode * temp = s.top();
+        s.pop();
+        if(temp->right) s.push(temp->right);
+        if(temp->left) s.push(temp->left);
+    }
+}
+void bfsTree(struct TreeNode * root){
+    if(root == nullptr){
+        printf("this is a null pointer...\n");
+        return;
+    }
+    printf("bfs: ");
+    list<struct TreeNode *> l;
+    l.push_back(root);
+    struct TreeNode * temp;
+    while(l.size() != 0){
+        temp = l.front();
+        if(temp->left) l.push_back(temp->left);
+        if(temp->right) l.push_back(temp->right);
+        printf("%d ", temp->value);
+        l.pop_front();
+    }
 }
 
 void CreateTree(struct TreeNode * root){
