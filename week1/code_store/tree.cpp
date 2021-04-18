@@ -10,7 +10,6 @@ struct TreeNode{
 
 void CreateTree(struct TreeNode * root);
 
-
 void preOrder_r(struct TreeNode * root);
 void preOrder__(struct TreeNode * root);
 void preOrder_morris(struct TreeNode * root);
@@ -28,6 +27,8 @@ void levelOrder__(struct TreeNode * root);
 
 void bfsTree(struct TreeNode * root);
 void dfsTree(struct TreeNode * root);
+
+void addPath(vector<int>& res, struct TreeNode * root);
 
 int main(){
 
@@ -55,10 +56,13 @@ int main(){
     printf("\n");
 
     //后序
+    printf("post order recursion: ");
     postOrder_r(root);
     printf("\n");
+    printf("post order iteration: ");
     postOrder__(root);
     printf("\n");
+    printf("post order morris: ");
     postOrder_morris(root);
     printf("\n");
 
@@ -161,7 +165,7 @@ void inOrder_morris(struct TreeNode * root){
     printf("in order morris: ");
     struct TreeNode * cur = root;
     struct TreeNode * mostright;
-    while(!(cur->left == nullptr && cur->right == nullptr)){
+    while(cur){
         if(cur->left == nullptr){
             printf("%d ", cur->value);
             cur = cur->right;
@@ -182,11 +186,10 @@ void inOrder_morris(struct TreeNode * root){
                 cur = cur->right;
             }
         }
-        //printf("%d ", cur->value);
     }
 }
 
-void postOrder_r(struct TreeNode * root){
+void postOrder_r(struct TreeNode * root){//O(n)
     if(root == nullptr) return;
     if(root->left)
         postOrder_r(root->left);
@@ -194,14 +197,13 @@ void postOrder_r(struct TreeNode * root){
         postOrder_r(root->right);
     printf("%d ", root->value);
 }
-void postOrder__(struct TreeNode * root){
+void postOrder__(struct TreeNode * root){//O(n)
     stack<struct TreeNode *> s;
     struct TreeNode * t = root;
     struct TreeNode * ptr;
     while(t || s.size() != 0){
         while(t){
             s.push(t);
-            //printf("%d", root->value);
             t = t->left;
         }
         t = s.top();
@@ -217,39 +219,45 @@ void postOrder__(struct TreeNode * root){
         }
     }
 }
-void postOrder_morris(struct TreeNode * root){
+void postOrder_morris(struct TreeNode * root){//O(n)
     //problem reserved
     struct TreeNode * cur = root;
     struct TreeNode * mostright;
     stack<struct TreeNode *> s;
-    while(!(cur->left == nullptr && cur->right == nullptr)){
+    vector<int> res;
+    while(cur != nullptr){
         if(cur->left == nullptr){
             cur = cur->right;
         }else{
             mostright = cur->left;
-            //s.push(cur);
             while(mostright->right != nullptr && mostright->right != cur){
                 mostright = mostright->right;
             }
             if(mostright->right == nullptr){
                 mostright->right = cur;
                 cur = cur->left;
-                //s.push(cur);
-            }
-            if(mostright->right == cur){
+                continue;
+            }else {
                 mostright->right = nullptr;
-                //if(cur->right != nullptr)
-                //    s.push(cur->right);
-                s.push(mostright);
+                addPath(res, cur->left);
                 cur = cur->right;
-                while(s.size() != 0){
-                    printf("%d ", s.top()->value);
-                    s.pop();
-                }
             }
         }
+        
     }
-    printf("%d ", root->value);
+    addPath(res, root);
+    for(vector<int>::iterator it = res.begin(); it != res.end(); it++)
+        printf("%d ", *it);
+}
+
+void addPath(vector<int>& res, struct TreeNode * root){
+    int count = 0;
+    while(root != nullptr){
+        ++count;
+        res.emplace_back(root->value);
+        root = root->right;
+    }
+    reverse(res.end() - count, res.end());
 }
 
 void levelOrder_r(struct TreeNode * root){

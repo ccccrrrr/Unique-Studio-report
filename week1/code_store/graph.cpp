@@ -45,12 +45,7 @@ int main(){
 }
 
 void bfs(int s){
-    //why when i add scanf s there can't show any output?
-
-    //int s;
-    //printf("enter a starting point: ");
-    //scanf("%d", &s);
-
+    //O(N+E)
     list<int> l;
     l.push_back(s);
     int visited[N] = {0};
@@ -73,6 +68,7 @@ void bfs(int s){
 }
 
 void dfs(int s){
+    //O(N+E)
     stack<int> m;
     int visited[N] = {0};
     _dfs(s, m, visited);
