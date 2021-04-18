@@ -93,6 +93,8 @@ void _dfs(int s, stack<int>& m, int* visited){
 }
 
 void topsort(void){
+    //there is a question when faced up with a circle,
+    //need to use a x for numeration, when up to n it breaks
     int _list[_N] = {0};
     calc_in_number(_list);
     queue<int> q;

@@ -1,12 +1,15 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <stdlib.h>
+#include <cstdio>
 #include <time.h>
 #include <random>
 using namespace std;
 #define N 4
+#define MAXLEVEL 7
 struct node {
     int key;
     int value;
-    struct node * forward[N]; // just store the head node in highest level
+    struct node * forward[MAXLEVEL]; // just store the head node in highest level
 };
 int randomLevel(int MaxLevel);
 struct ListStructure {
@@ -17,11 +20,13 @@ struct ListStructure {
     }
     int Search(int key){
         struct node * x = this->head;
+        
         for(int i = this->level - 1; i >= 0; i--){
             while(x->forward[i]->key < key){
                 x = x->forward[i];
             }
         }
+        
         x = x->forward[0];
         if(x->key == key){
             printf("sucessful search: key: %d value: %d\n", x->key, x->value);
@@ -33,13 +38,13 @@ struct ListStructure {
         }
     }
     void _insert(int key, int value){
-        struct node * local[this->level];
+        struct node * update[MAXLEVEL];
         struct node * x = this->head;
         for(int i = this->level - 1; i >= 0; i--){
             while(x->forward[i]->key < key){
                 x = x->forward[i];
             }
-            local[i] = x;
+            update[i] = x;
         }
         x = x->forward[0];
         if(x->key == key){
@@ -48,15 +53,24 @@ struct ListStructure {
             return;
         }else{
             int newLevel = randomLevel(this->level);
-            //let's assume that newlevel will not greater than present max level...
+            //let's assume that newlevel will not be greater than present max level...
+            
+            if(newLevel > this->level){
+                for(int i = this->level; i < newLevel; i++){
+                    update[i] = this->head;
+                this->level = newLevel;
+                }
+            }
+            
             x = new node;
             x->key = key;
             x->value = value;
             for(int i = newLevel - 1; i >= 0; i--){
-                x->forward[i] = local[i]->forward[i];
-                local[i]->forward[i] = x;
+                x->forward[i] = update[i]->forward[i];
+                update[i]->forward[i] = x;
             }
-            printf("sucessfully add [%d, %d], in level[%d, %d]\n", key, value, 1, newLevel);
+
+            printf("sucessfully add [%d, %d], in level%d\n", key, value, newLevel);
             
         }
     }
@@ -75,9 +89,23 @@ struct ListStructure {
                     break;
                 update[i]->forward[i] = x->forward[i];
             }
+            printf("delete [%d, %d]\n", key, x->value);
+            /*
+            if(this->head->forward[this->level] == nullptr){
+                printf("null!");
+            }
+            */
+            /*
+            while(this->level >= 0 && this->head->forward[this->level]->key == 0xFFFF){
+                this->level--;
+            }
+            */
             free(x);
-            //while(this->level > 1 && this->head->forward[this->level]->key == 0xFFFF)
-            //    this->level--;
+
+            
+        }
+        else{
+            printf("[warning] key: %d not found\n", key);
         }
     }
     void update(int key, int new_value){
@@ -115,30 +143,56 @@ struct ListStructure {
 };
 struct ListStructure * CreateSkipList(void);
 int main(){
+    srand(time(0));
     struct ListStructure * skipList = CreateSkipList();
     skipList->Search(6);
     skipList->Search(26);
     skipList->Search(9);
     skipList->Search(10);
     skipList->_insert(10, 10);
-    skipList->Search(10);
+    //printf("level: %d\n", skipList->level);
+    skipList->_insert(11, 11);
+    //printf("level: %d\n", skipList->level);
+    skipList->_insert(12, 12);
+    //printf("level: %d\n", skipList->level);
+    skipList->_insert(13, 13);
+    //printf("level: %d\n", skipList->level);
+    skipList->_insert(14, 14);
+    //printf("level: %d\n", skipList->level);
+    
+    skipList->_delete(14);
+    //printf("level: %d\n", skipList->level);
+    skipList->_delete(13);
+    //printf("level: %d\n", skipList->level);
+    skipList->_delete(12);
+    //printf("level: %d\n", skipList->level);
+    skipList->_delete(11);
+    //printf("level: %d\n", skipList->level);
     skipList->_delete(10);
-    skipList->Search(10);
-    skipList->Search(9);
-    skipList->search_range(1, 200);
+    //printf("level: %d\n", skipList->level);
+    skipList->_delete(222);
+    //printf("level: %d\n", skipList->level);
+    
+    //skipList->Search(10);
+    //skipList->_delete(10);
+    //skipList->Search(10);
+    //skipList->Search(9);
+    skipList->search_range(1, 20);
     return 0;
 }
 struct ListStructure * CreateSkipList(void){
-    struct ListStructure * skiplist = new ListStructure(4);
+    struct ListStructure * skiplist = new ListStructure(N);
     struct node * head = new node;
     struct node * nodeList[11];
     nodeList[10] = new node;
     nodeList[10]->key = nodeList[10]->value = 0xFFFF;
     for(int i = 0; i < 11; i++){
         nodeList[i] = new node;
-        for(int j = 0; j < N; j++)
-            nodeList[i]->forward[j] = nodeList[10];
+        for(int j = 0; j < MAXLEVEL; j++)
+            nodeList[i]->forward[j] = nodeList[10];  
     }
+    for(int i = 0; i < MAXLEVEL; i++)
+        head->forward[i] = nodeList[10];
     head->forward[0] = nodeList[0];
     head->forward[1] = head->forward[2] = head->forward[3] = nodeList[1];
     head->key = head->value = 0;
@@ -171,7 +225,14 @@ struct ListStructure * CreateSkipList(void){
 }
 
 int randomLevel(int MaxLevel){
-    srand((int)time(0));
-    int temp = rand() % MaxLevel + 1;
-    return temp;  
+    int level = 1;
+    int temp = 0;
+    while(true){
+        temp = rand() % 100 + 1;
+        if(temp <= 50 || level >= MaxLevel)
+            return level;
+        else
+            level++;
+    }
+    return level;
 }

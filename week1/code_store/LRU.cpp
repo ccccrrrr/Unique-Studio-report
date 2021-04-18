@@ -2,16 +2,14 @@
 using namespace std;
 #include <unordered_map>
 #include <list>
-struct node{
-//public:
+struct node {
     int key, value;
-    //struct node *pre, *next;
     node(int key, int value){
         this->key = key;
         this->value = value;
     }
 };
-struct LRUCache{
+struct LRUCache {
     int capacity;
     unordered_map<int, list<struct node*>::iterator> _map;
     list<struct node *> _list;
@@ -28,6 +26,7 @@ struct LRUCache{
             return -1;
         }else{
             auto temp = _map.find(key);
+            //STL C++ splice: move the element int list to first of the list
             _list.splice(_list.begin(), _list, temp->second);
             printf("[finding] output is [%d, %d]\n", temp->first, (*temp->second)->value);
             return temp->first;
@@ -43,7 +42,7 @@ struct LRUCache{
         {
             struct node * temp = _list.back();
             printf("[warning] cache is already full... the data: [%d, %d] is deserted\n", temp->key, temp->value);;
-            printf("[%d, %d] is put\n", key, value);
+            printf("[%d, %d] is put in cache\n", key, value);
             _map.erase(temp->key);
             _list.pop_back();
             struct node * t = new node(key, value);
@@ -55,7 +54,7 @@ struct LRUCache{
             struct node * t = new node(key, value);
             _list.push_front(t);
             _map.emplace(t->key, _list.begin());
-            printf("[%d, %d] is put sucessfully\n", key, value);
+            printf("[%d, %d] is put in cache sucessfully\n", key, value);
         }
         
     }
@@ -67,6 +66,9 @@ int main(){
     cache->put(4, 6);
     cache->put(5, 8);
     cache->get(2);
+    //cache->get(4);
+    //cache->put(6, 7);
+    //cache->put(7, 8);
     cache->put(0, 88);
     cache->get(3);
     return 0;
