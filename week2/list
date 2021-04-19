@@ -1,0 +1,57 @@
+# mission
+
+## OAUTH
+
+![Authorization Code Flow](/home/ccrr/Desktop/Authorization Code Flow.png)
+
+### APP XYZ
+
+`app.default()`
+
+#### get link to service
+
+#### post authorization request
+
+request to authorization Endpoint
+
+```
+GET {Authorization Endpoint}
+  ?response_type=code             // - Required
+  &client_id={Client ID}          // - Required
+  &redirect_uri={Redirect URI}    // - Conditionally required
+  &scope={Scopes}                 // - Optional
+  &state={Arbitrary String}       // - Recommended
+  &code_challenge={Challenge}     // - Optional
+  &code_challenge_method={Method} // - Optional
+  HTTP/1.1
+HOST: {Authorization Server}
+```
+
+#### get an authorization code from service
+
+#### post authorization code
+
+#### get access token
+
+#### post resource request
+
+It will mention in 图床.
+
+### SERVICE ABC
+
+#### get authorization request (return authorization page)
+
+#### return authorization page
+
+#### -- 4 skip --
+
+#### login operation
+
+#### issue a short-lived authorization code(optional time)
+
+#### get authorization code, and post token
+
+
+
+
+
