@@ -27,7 +27,19 @@ type AuthRequest struct{
 //	CodeChallenge string
 //	CodeChallengeMethod string
 }
+type RequestPermission struct{
+	LoginId string `json:"login_id"`
+	Password string `json:"password"`
+	// tbc
+}
 
+func check(loginId string, password string) bool {
+	return true
+}
+
+func generateAutoCode(loginId string, password string) string {
+	return "ccccrrrr"
+}
 func main() {
 
 	server := gin.Default()
@@ -95,6 +107,38 @@ func main() {
 		path := "http://localhost:9090/server/" + redirectUri + "?code=" + AuthorizationCode + "&state=" + state
 		c.Redirect(302, path)
 	})
+
+	// server redirect page
+	// check requested permission
+	// get json format information
+	server.GET("/server/redirect", func(c *gin.Context){
+		json := RequestPermission{}
+		_ = c.BindJSON(&json)
+		loginId := json.LoginId
+		password := json.Password
+		if check(loginId, password) {
+			//authorizationCode := generateAutoCode()
+			//c.JSON(200, gin.H{
+			//	"message": "need authorization code",
+			//})
+			c.Redirect(http.StatusTemporaryRedirect, "/server/sendAuthCode?loginId=" + loginId + "&password=" + password)
+		} else{
+			c.String(200, "wrong password or username\n")
+		}
+	})
+
+	// step 6 issue a short-lived authorization code
+	// but I can just use restClient to get the authorization code ;(
+	server.GET("/server/sendAuthCode", func(c *gin.Context){
+		loginId := c.Query("loginId")
+		password := c.Query("password")
+		authCode := generateAutoCode(loginId, password)
+		c.JSON(http.StatusOK, gin.H{
+			"authorizationCode": authCode,
+		})
+	})
+
+	// step 7 also in restClient see requestToTokenEndpoint.http
 
 	// server receive code and issue an access token
 	server.POST("/server/token_endpoint", func(c *gin.Context){
