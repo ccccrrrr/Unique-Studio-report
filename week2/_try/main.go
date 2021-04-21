@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	//"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -40,70 +39,58 @@ func check(loginId string, password string) bool {
 func generateAutoCode(loginId string, password string) string {
 	return "ccccrrrr"
 }
+
+func generateAccessToken(authCode string) string {
+	return "kkk"
+}
 func main() {
 
 	server := gin.Default()
 
-	db, err := gorm.Open("mysql", "root: @(localhost:3306)/db1?charset=utf8mb4&parseTime=True&loc=Local")
-
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-	//set form
-	db.CreateTable(&AuthRequest{})
-	defer db.Close()
-
-	//1. Request from User to App to link to ServiceABC
-
-	//2. App make authorization request to serviceABC
-
-	// 3. serviceABC return an authorization page to APP
-	// a request was sent from APP to server
-	// and the server receive it and redirect to redirect page with code
-	//server.GET("/server/authorization", func(c *gin.Context){
-	//	clientId := c.Query("client_id")
-	//	code := c.Query("response_type")
-	//	scope := "read-only"
-	//	redirect_uri := c.Query("redirect_uri")
-	//	if len(c.Query("scope")) == 0 {
-	//		scope = c.Query("scope")
-	//	}
-	//	db.Update(&AuthRequest{
-	//		ResponseType: code,
-	//		ClientId:     clientId,
-	//		RedirectUri:  redirect_uri,
-	//		Scope:        scope,
-	//	})
-	//	c.Redirect(http.StatusPermanentRedirect, "/server/" + redirect_uri + "?code=" + code)
-	//})
-	//g1 := server.Group("/server/" + redirect_uri)
-	//path := ""
-	//json := ClientInfo{}
-		//through json, get clientID, clientPassword
-
-
-	// in server redirect page, get code
-	// it needs to add a verifying operation
-	//server.GET("/server/redirect", func(c *gin.Context){
-	//	getCode := c.Query("code")
-	//	fmt.Println(getCode)
-	//	// store code in db1?
-	//})
-
-
+	//db, err := gorm.Open("mysql", "root: @(localhost:3306)/db1?charset=utf8mb4&parseTime=True&loc=Local")
+	//
+	//if err != nil {
+	//	fmt.Println(err)
+	//	panic(err)
+	//}
+	////set form
+	//db.CreateTable(&AuthRequest{})
+	//defer db.Close()
 
 	server.GET("/server/authorization_endpoint", func(c *gin.Context){
-		//responseType := c.Query("response_type")
-		clientId := c.Query("client_id")
-		redirectUri := c.Query("redirect_uri")
-		//scope := c.Query("scope")
-		state := c.Query("state")
-		//codeChallenge := c.Query("code_challenge")
-		//codeChallengeMethod := c.Query("code_challenge_method")
 
+		// Tells the authorization server which grant to execute
+		//responseType := c.Query("response_type")
+
+		// clientID: public identifier
+		// github: 6779ef20e75817b79602
+		//clientId := c.Query("client_id")
+
+
+		// holds a URL. A successful response from this endpoint results in a redirect to this URL
+		redirectUri := c.Query("redirect_uri")
+
+		// A space-delimited list of permissions that the application requires.
+		// changes are needed later
+		// scope := c.Query("scope")
+
+		// An opaque value, used for security purposes. If this request parameter is set in the request, then it is returned to the application as part of the redirect_uri.
+		// assume it will never appear
+		state := c.Query("state")
+
+		//codeChallenge := c.Query("code_challenge")
+		var codeChallenge string
+		codeChallengeMethod := c.Query("code_challenge_method")
+		codeVerifier := generateCodeVerifier()
+		if codeChallengeMethod == "plain" {
+			codeChallenge = codeVerifier
+		} else {
+			// changes are needed
+			// it might cost much time to write S256 method, so I assume codeChallengeMethod always be plain
+			codeChallenge = codeVerifier
+		}
 		// temporary
-		AuthorizationCode := clientId
+		AuthorizationCode := codeChallenge
 		path := "http://localhost:9090/server/" + redirectUri + "?code=" + AuthorizationCode + "&state=" + state
 		c.Redirect(302, path)
 	})
@@ -139,7 +126,6 @@ func main() {
 	})
 
 	// step 7 also in restClient see requestToTokenEndpoint.http
-
 	// server receive code and issue an access token
 	server.POST("/server/token_endpoint", func(c *gin.Context){
 		//grantType := c.PostForm("grant_type")
@@ -154,12 +140,16 @@ func main() {
 			"scope": "",
 		})
 	})
-	//4. APP display the authorization page
-	//5. user input ID and password and choose life span
-	//6. service issue an authorization code to App
-	//7. App present authorization code
-	//8. service issue an access token
-	//9.
+
+	// step 8 issue an access token to app
+	// need an authorization_code
+	server.GET("/server/token_endpoint", func(c *gin.Context){
+		authCode := c.Query("authorization_code")
+		accessToken := generateAccessToken(authCode)
+		c.JSON(http.StatusOK, gin.H{
+			"access token": accessToken,
+		})
+	})
 
 	_ = server.Run(":9090")
 }
