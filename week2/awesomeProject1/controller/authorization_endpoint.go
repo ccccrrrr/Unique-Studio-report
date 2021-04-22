@@ -15,7 +15,16 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
-func Authorization_endpoint(server *gin.Engine) {
+type scope struct {
+	Scope       string    `json:"scope"`
+	TimeSpan    time.Time `json:"time_span"`
+	PresentTime time.Time `json:"present_time"`
+}
+
+func Authorization(server *gin.Engine) {
+	server.POST("/server/authorization", _Authorization)
+	server.GET("/server/authorization", getAuthorization)
+	server.GET("/server/choose_scope", ChooseScope)
 	server.GET("/server/authorization_endpoint", getAuthorizationEndpoint)
 	server.GET("/server/redirect", getClientInfo)
 	server.GET("/server/sendAuthCode", sendAuthCode)
@@ -24,7 +33,37 @@ func Authorization_endpoint(server *gin.Engine) {
 	server.GET("/server/token_endpoint", issueAccessToken)
 }
 
-func issueAccessToken(c *gin.Context){
+func getAuthorization(c *gin.Context){
+	//c.JSON(http.StatusOK, gin.H{
+	//	"message": "OK",
+	//})
+	json := map[string]string{}
+	_ = c.BindJSON(&json)
+	if model.CheckState(json["user_name"]) {
+		c.Redirect(http.StatusPermanentRedirect, "/server/choose_scope")
+	} else {
+		c.Redirect(http.StatusTemporaryRedirect, "/login")
+	}
+}
+
+func ChooseScope(c *gin.Context) {
+//	json := scope{}
+//	_ = c.BindJSON(&json)
+//	c.Redirect()
+}
+
+func _Authorization(c *gin.Context) {
+	// need the name of the user
+	json := map[string]string{}
+	_ = c.BindJSON(&json)
+	if model.CheckState(json["user_name"]) {
+		c.Redirect(http.StatusPermanentRedirect, "/server/choose_scope")
+	} else {
+		c.Redirect(http.StatusTemporaryRedirect, "/login")
+	}
+}
+
+func issueAccessToken(c *gin.Context) {
 	authCode := c.Query("authorization_code")
 	accessToken := generateAccessToken(authCode)
 	c.JSON(http.StatusOK, gin.H{
@@ -32,7 +71,7 @@ func issueAccessToken(c *gin.Context){
 	})
 }
 
-func getAuthCode(c *gin.Context){
+func getAuthCode(c *gin.Context) {
 	//grantType := c.PostForm("grant_type")
 	//authorizationCode := c.PostForm("code")
 	//redirectUri := c.PostForm("redirect_uri")
@@ -46,7 +85,7 @@ func getAuthCode(c *gin.Context){
 	})
 }
 
-func sendAuthCode(c *gin.Context){
+func sendAuthCode(c *gin.Context) {
 	loginId := c.Query("loginId")
 	password := c.Query("password")
 	authCode := generateAutoCode(loginId, password)
@@ -55,7 +94,7 @@ func sendAuthCode(c *gin.Context){
 	})
 }
 
-func getClientInfo(c *gin.Context){
+func getClientInfo(c *gin.Context) {
 	json := model.RequestPermission{}
 	_ = c.BindJSON(&json)
 	loginId := json.LoginId
@@ -71,7 +110,7 @@ func getClientInfo(c *gin.Context){
 	}
 }
 
-func getAuthorizationEndpoint(c *gin.Context){
+func getAuthorizationEndpoint(c *gin.Context) {
 
 	// Tells the authorization server which grant to execute
 	//responseType := c.Query("response_type")
@@ -110,10 +149,10 @@ func getAuthorizationEndpoint(c *gin.Context){
 	c.Redirect(302, path)
 }
 
-func generateCodeVerifier() string{
+func generateCodeVerifier() string {
 	length := rand.Intn(86) + 43
 	var codeVerifier string
-	for i := 0; i < length ; i++ {
+	for i := 0; i < length; i++ {
 		codeVerifier += string(letters[rand.Intn(43)])
 	}
 	return codeVerifier

@@ -4,8 +4,7 @@ import (
 	"awesomeProject1/controller"
 	"awesomeProject1/model"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/gorm"
 )
 
 type ClientInfo struct {
@@ -43,9 +42,9 @@ func generateAccessToken(authCode string) string {
 func main() {
 
 	server := gin.Default()
-
+//	app := gin.Default()
 	model.StartDatabase()
-
+	server.LoadHTMLGlob("./static/html/*")
 	//db, err := gorm.Open("mysql", "root: @(localhost:3306)/db1?charset=utf8mb4&parseTime=True&loc=Local")
 
 	//if err != nil {
@@ -59,8 +58,10 @@ func main() {
 	//defer db.Close()
 
 	// need client id verify
-	controller.Authorization_endpoint(server)
+	controller.Authorization(server)
 	controller.Login(server)
+	controller.PictureStore(server)
+	controller.ThirdParty(server)
 /*	server.GET("/server/authorization_endpoint", func(c *gin.Context) {
 
 		// Tells the authorization server which grant to execute
@@ -157,4 +158,5 @@ func main() {
 	})
 */
 	_ = server.Run(":9090")
+//	_ = app.Run(":9000")
 }

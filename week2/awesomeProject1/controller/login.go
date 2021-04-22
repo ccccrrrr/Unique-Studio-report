@@ -5,34 +5,36 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"time"
 )
 
-func Login(server *gin.Engine){
-	server.POST("/login/register", Register)
-	server.POST("/login/login", _login)
+type instruction struct {
+	Direct string `json:"direct"`
 }
 
-func Register(c *gin.Context){
-	info := model.User{}
-	err := c.BindJSON(&info)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	if err = model.InsertUser(info); err != nil {
-		log.Println(err)
-		return
-	}
+func Login(server *gin.Engine){
+	server.GET("/login", Choose_)
+	server.POST("/login", Choose)
+	server.POST("/login/register", Register_)
+	server.GET("/login/register", Register)
+	server.GET("/login/login", _login)
+	server.POST("/login/login", _login_)
+}
+
+func Register_(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
-		"message": "successful register",
+		"message": "register information",
 	})
 }
 
-func _login(c *gin.Context){
+func _login_(c *gin.Context){
+
 	info := model.User{}
 	err := c.BindJSON(&info)
+	log.Println(info)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	if model.Login(info) {
 		c.JSON(http.StatusOK, gin.H{
@@ -44,5 +46,71 @@ func _login(c *gin.Context){
 			"massage": "fail to login",
 		})
 	}
+
+	//c.JSON(http.StatusOK, gin.H{
+	//	"message": "login information",
+	//})
+}
+
+func Choose_(c *gin.Context){
+	c.HTML(http.StatusOK, "login.html", nil)
+}
+
+func Choose(c *gin.Context){
+	json := instruction{}
+	_ = c.BindJSON(&json)
+	if json.Direct == "login" {
+		c.Redirect(http.StatusPermanentRedirect, "/login/login")
+	}else if json.Direct == "register" {
+		c.Redirect(http.StatusMovedPermanently, "/login/register")
+	}else if json.Direct == "error" {
+		c.JSON(http.StatusOK, gin.H{
+			"warning": "wrong selection!",
+		})
+	}else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"warning": "error",
+		})
+	}
+}
+
+func Register(c *gin.Context){
+	info := model.User{}
+	err := c.BindJSON(&info)
+	info.LastLoginTime = time.Now()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Printf("%+v", info)
+	if err = model.InsertUser(info); err == nil {
+		//log.Println(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successful register",
+	})
+}
+
+func _login(c *gin.Context){
+
+	c.HTML(http.StatusOK, "login-login.html", nil)
+
+	//info := model.User{}
+	//err := c.BindJSON(&info)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
+	//if model.Login(info) {
+	//	c.JSON(http.StatusOK, gin.H{
+	//		"massage": "login successfully",
+	//		"username": info.UserName,
+	//	})
+	//}else {
+	//	c.JSON(http.StatusOK, gin.H{
+	//		"massage": "fail to login",
+	//	})
+	//}
 
 }
