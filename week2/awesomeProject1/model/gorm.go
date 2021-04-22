@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
+	"log"
 )
+
+type DeleteInfo struct {
+	DeleteUser string `json:"delete_user"`
+	DeletePictureName string `json:"delete_picture_name"`
+}
+
 var (
 	Db *gorm.DB
 	//dbUser *gorm.DB
@@ -28,4 +34,25 @@ func StartDatabase() {
 
 	Db = _db
 
+}
+
+func DeletePicture(picture DeleteInfo) bool {
+	tmp := Picture{}
+	log.Println("yes")
+	log.Println(picture)
+	// therefore we must search for every picture in the
+	if err := Db.Table("pictures").Where("name = ?", picture.DeletePictureName).First(&tmp).Error; err == nil{
+		log.Println(tmp)
+
+		Db.Table("pictures").Delete(&tmp)
+		//for _, info := range tmp {
+		//	log.Println(info)
+		//	if info.CreateUserName == picture.DeleteUser {
+		//		Db.Table("pictures").Delete(&info)
+		//		return true
+		//	}
+		//}
+		return true
+	}
+	return false
 }

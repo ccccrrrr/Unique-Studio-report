@@ -34,12 +34,12 @@ func getPicture(c *gin.Context) {
 	_ = c.BindJSON(&json)
 
 	// I don't know why the time is not stored in mysql
-	json.CreateTime = time.Now()
+	//json.CreateTime = time.Now()
 	log.Println(json)
 	u := model.User{
-		json.CreateUserName,
-		json.CreateUserPassword,
-		time.Now(),
+		UserName:      json.CreateUserName,
+		UserPassword:  json.CreateUserPassword,
+		LastLoginTime: time.Now(),
 	}
 	// need to judge if the same picture has been stored
 	if model.Login(u) {

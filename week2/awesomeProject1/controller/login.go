@@ -31,7 +31,7 @@ func _login_(c *gin.Context){
 
 	info := model.User{}
 	err := c.BindJSON(&info)
-	tmp := model.User{}
+	//tmp := model.User{}
 	log.Println(info)
 	if err != nil {
 		log.Println(err)

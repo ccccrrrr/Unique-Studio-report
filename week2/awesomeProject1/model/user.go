@@ -32,7 +32,7 @@ func Login(u User) bool {
 	}else {
 		if user.UserPassword == u.UserPassword {
 			// need to update state
-			Db.Table("users").Model(&user).Update("last_login_time", time.Now())
+			Db.Table("users").Model(&user).Where("user_name = ?", u.UserName).Update("last_login_time", time.Now())
 			return true
 		}else {
 			return false
@@ -43,14 +43,13 @@ func Login(u User) bool {
 func CheckState(name string) bool {
 	var u User
 	if err := Db.Table("users").Where("user_name = ?", name).First(&u).Error; err == nil {
-		return false
+		if time.Now().Sub(u.LastLoginTime) > duration {
+			return false
+		}else {
+			return true
+		}
 	}
-	if time.Now().Sub(u.LastLoginTime) > duration {
-		//dbUser.Model(&u).Update("state", false)
-		return false
-	}else {
-		return true
-	}
+	return false
 }
 
 func IsValid(name string) bool {
