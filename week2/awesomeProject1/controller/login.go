@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"awesomeProject1/model"
+	"awesomeproject1/model"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -15,8 +15,8 @@ type instruction struct {
 func Login(server *gin.Engine){
 	server.GET("/login", Choose_)
 	server.POST("/login", Choose)
-	server.POST("/login/register", Register_)
-	server.GET("/login/register", Register)
+	server.POST("/login/register", Register)
+	server.GET("/login/register", Register_)
 	server.GET("/login/login", _login)
 	server.POST("/login/login", _login_)
 }
@@ -31,16 +31,20 @@ func _login_(c *gin.Context){
 
 	info := model.User{}
 	err := c.BindJSON(&info)
+	tmp := model.User{}
 	log.Println(info)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	if model.Login(info) {
+		//model.Db.Where("user_name = ?", info.UserName).First(&tmp)
+		//model.Db.Model(&tmp).Update("last_login_time", time.Now())
 		c.JSON(http.StatusOK, gin.H{
 			"massage": "login successfully",
 			"username": info.UserName,
 		})
+		//c.Redirect(http.StatusPermanentRedirect, "/picture")
 	}else {
 		c.JSON(http.StatusOK, gin.H{
 			"massage": "fail to login",
@@ -85,6 +89,9 @@ func Register(c *gin.Context){
 	log.Printf("%+v", info)
 	if err = model.InsertUser(info); err == nil {
 		//log.Println(err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "fail to register",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{

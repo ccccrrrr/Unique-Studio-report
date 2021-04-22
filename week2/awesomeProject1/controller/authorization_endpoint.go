@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"awesomeProject1/model"
+	"awesomeproject1/model"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"

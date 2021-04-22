@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+
 type User struct {
 	UserName     string `json:"username" gorm:"user_name"`
 	UserPassword string `json:"userpassword" gorm:"user_password"`
@@ -16,9 +17,9 @@ var (
 
 func InsertUser(user User) error {
 	var u User
-	if err := dbUser.Where("user_name = ?", user.UserName).First(&u).Error; err != nil {
+	if err := Db.Table("users").Where("user_name = ?", user.UserName).First(&u).Error; err != nil {
 		//log.Println(err)
-		dbUser.Table("users").Create(&user)
+		Db.Table("users").Table("users").Create(&user)
 		return err
 	}
 	return nil
@@ -26,12 +27,12 @@ func InsertUser(user User) error {
 
 func Login(u User) bool {
 	var user User
-	if err := dbUser.Where("user_name = ?", u.UserName).First(&user); err == nil {
+	if err := Db.Table("users").Where("user_name = ?", u.UserName).First(&user); err == nil {
 		return false
 	}else {
 		if user.UserPassword == u.UserPassword {
 			// need to update state
-			dbUser.Model(&user).Update("last_login_time", time.Now())
+			Db.Table("users").Model(&user).Update("last_login_time", time.Now())
 			return true
 		}else {
 			return false
@@ -41,7 +42,7 @@ func Login(u User) bool {
 
 func CheckState(name string) bool {
 	var u User
-	if err := dbUser.Where("user_name = ?", name).First(&u).Error; err == nil {
+	if err := Db.Table("users").Where("user_name = ?", name).First(&u).Error; err == nil {
 		return false
 	}
 	if time.Now().Sub(u.LastLoginTime) > duration {
@@ -50,6 +51,10 @@ func CheckState(name string) bool {
 	}else {
 		return true
 	}
+}
+
+func IsValid(name string) bool {
+	return CheckState(name)
 }
 
 //func LogOut(u User) bool {

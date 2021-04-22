@@ -1,8 +1,8 @@
 package main
 
 import (
-	"awesomeProject1/controller"
-	"awesomeProject1/model"
+	"awesomeproject1/controller"
+	"awesomeproject1/model"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
