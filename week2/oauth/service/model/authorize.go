@@ -3,7 +3,8 @@ package model
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
-//	"strconv"
+	"gorm.io/gorm"
+	//	"strconv"
 	"time"
 )
 
@@ -11,12 +12,14 @@ type AccessTokenInfo struct {
 	UserName    string    `json:"user_name"`
 	AuthCode    string    `json:"code"`
 	Scope       string    `json:"scope"`
+	ScopeNumber int       `json:"scope_number"`
 	AccessToken string    `json:"access_token"`
 	ExpireTime  time.Time `json:"expire_time"`
 	CreateTime  time.Time `json:"create_time"`
 }
 
 type AuthInfo struct {
+	gorm.Model
 	UserName   string    `json:"user_name"`
 	Code       string    `json:"code"`
 	Scope      string    `json:"scope"`
@@ -84,9 +87,19 @@ func GenerateAccessToken(authCode string, expireTime int) AccessTokenInfo {
 	accessTokenInfo.Scope = authCodeInfo.Scope
 	accessTokenInfo.CreateTime = time.Now()
 	accessTokenInfo.UserName = authCodeInfo.UserName
-	accessTokenInfo.ExpireTime = authCodeInfo.TimeNow.Add(time.Duration(expireTime))
+	accessTokenInfo.ExpireTime = authCodeInfo.TimeNow.Add(time.Minute * time.Duration(expireTime))
 	accessTokenInfo.AuthCode = authCodeInfo.Code
 	accessTokenInfo.AccessToken = randstr.Hex(20)
 	Db.Create(&accessTokenInfo)
 	return accessTokenInfo
+}
+
+func GenerateScopeNumber(scope string) int {
+	if scope == "read" {
+		return 1
+	} else if scope == "read-write" {
+		return 2
+	} else {
+		return 0
+	}
 }

@@ -19,6 +19,7 @@ func managePicture(c *gin.Context) {
 		return
 	}
 	choice := c.PostForm("submit")
+	log.Printf("choice: " + choice)
 	switch choice {
 	case "delete":
 		picture_name := c.PostForm("picture_name")

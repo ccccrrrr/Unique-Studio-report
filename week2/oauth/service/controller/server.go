@@ -9,16 +9,9 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
-
-type AccessTokenInfo struct {
-	ExpireTime  time.Time `json:"expire_time"`
-	UserName    string    `json:"user_name"`
-	AccessToken string    `json:"access_token"`
-	Scope       string    `json:"scope"`
-	ScopeNumber int       `json:"scope_number"`
-}
 
 type sendAccessToken struct {
 	AccessToken string
@@ -63,8 +56,11 @@ func generateAuthCode(c *gin.Context) {
 
 func issueAccessToken(c *gin.Context) {
 	authCode := c.Query("grant_type")
+	detail, _ := model.FindInfoThroughAuthCode(authCode)
 	log.Printf("authCode:%v", authCode)
-	accessTokenInfo := model.GenerateAccessToken(authCode, 20)
+	expire_time, _ := strconv.Atoi(detail.ExpireTime)
+	accessTokenInfo := model.GenerateAccessToken(authCode, expire_time)
+	accessTokenInfo.ScopeNumber = model.GenerateScopeNumber(accessTokenInfo.Scope)
 	bytes, _ := json.Marshal(accessTokenInfo)
 	reqs, _ := http.NewRequest(http.MethodPut, "http://localhost:9001/HomePage/getAuth", bytes2.NewReader(bytes))
 	client := http.Client{}

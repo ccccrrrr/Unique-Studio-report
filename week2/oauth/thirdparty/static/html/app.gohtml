@@ -12,34 +12,28 @@
     {{ else if eq .ScopeNumber 1}}
         <div>2. show picture</div>
         <div>
-            <form method="post">
-                <!--        username<input name="username" type="text" value="zht"><br />-->
-                <!--        userpassword<input name="userpassword" type="password" value="xxx"><br />-->
-                <input type="submit" name="submit" value="show">
-            </form>
+                <form method="post" action="http://localhost:9090/picture">
+                    <input type="submit" name="submit" value="show">
+                </form>
         </div>
     {{ else if eq .ScopeNumber 2}}
         <div>1. upload picture</div>
         <div>
-            <form method="post">
-                <input name="username" type="file" value="picture"><br />
-                <!--          <input name="userpassword" type="password" value="xxx"><br />-->
+            <form method="post" enctype="multipart/form-data" action="http://localhost:9090/picture">
+                <input type="file" name="picture"><br/>
                 <input type="submit" name="submit" value="add">
             </form>
         </div>
         <div>2. show picture</div>
         <div>
-            <form method="post">
-                <!--        username<input name="username" type="text" value="zht"><br />-->
-                <!--        userpassword<input name="userpassword" type="password" value="xxx"><br />-->
+            <form method="post" action="http://localhost:9090/picture">
                 <input type="submit" name="submit" value="show">
             </form>
         </div>
         <div>3. delete picture</div>
         <div>
-            <form method="post">
-                <!--        username<input name="username" type="text" value="zht"><br />-->
-                <input name="picturename" type="text"><br />
+            <form method="post" action="http://localhost:9090/picture">
+                <input type="text" name="picture_name"><br/>
                 <input type="submit" name="submit" value="delete">
             </form>
         </div>
