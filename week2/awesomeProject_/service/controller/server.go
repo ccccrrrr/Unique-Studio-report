@@ -1,15 +1,25 @@
 package controller
 
 import (
-	model2 "awesomeproject1/service/model"
+	"awesomeproject1/service/model"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
+	"unsafe"
 )
+
+type AccessTokenInfo struct {
+	ExpireTime  time.Time `json:"expire_time"`
+	UserName    string    `json:"user_name"`
+	AccessToken string    `json:"access_token"`
+	Scope       string    `json:"scope"`
+	ScopeNumber int       `json:"scope_number"`
+}
 
 type sendAccessToken struct {
 	AccessToken string
@@ -31,10 +41,10 @@ func init() {
 //}
 
 func Authorization(server *gin.Engine) {
-	server.GET("/server", getAuthorizationPage)
-	server.POST("/server/authorization", _Authorization)
-	server.GET("/server/authorization", getAuthorization)
-	server.GET("/server/choose_scope", ChooseScope)
+//	server.GET("/server", getAuthorizationPage)
+//	server.POST("/server/authorization", _Authorization)
+//	server.GET("/server/authorization", getAuthorization)
+//	server.GET("/server/choose_scope", ChooseScope)
 	server.GET("/server/authorization_endpoint", getAuthorizationEndpoint)
 	server.POST("/server/authorization_endpoint", generateAuthCode)
 	server.GET("/server/redirect", getClientInfo)
@@ -42,6 +52,22 @@ func Authorization(server *gin.Engine) {
 	server.POST("/server/token_endpoint", getAuthCode)
 	// step 7 and 8
 	server.GET("/server/token_endpoint", issueAccessToken)
+	server.POST("/server/isValidToken", isValidTokenPost)
+}
+
+func isValidTokenPost(c * gin.Context){
+	accessToken := c.Query("token")
+	req, _ := http.NewRequest(http.MethodPost, "http://localhost:9001/HomePage", nil)
+	if accessToken == "" || !model.IsValidToken(accessToken) {
+		info := AccessTokenInfo{
+			time.Now(),
+			"",
+			"",
+			"",
+			-1}
+		req.Body.Read(*(*[]byte)(unsafe.Pointer(&info)))
+		req.Header.Add("Content-Type", "application/json")
+	}
 }
 
 func generateAuthCode(c *gin.Context) {
@@ -60,15 +86,15 @@ func generateAuthCode(c *gin.Context) {
 		//wordList, _ := generate.GenRandomMix(10)
 		//code := wordList.Chance
 		// store authzcode in db
-		code := model2.GenerateTempAuthCode(client_id)
-		model2.InsertAuthCodeInfo(model2.AuthInfo{
+		code := model.GenerateTempAuthCode(client_id)
+		model.InsertAuthCodeInfo(model.AuthInfo{
 			client_id,
 			code,
 			scope,
 			expire,
 			time.Now(),
 		})
-		model2.AuthCodeToUser(client_id, scope, expire, code)
+		model.AuthCodeToUser(client_id, scope, expire, code)
 		path := "http://localhost:9090/HomePage?code="
 		path += code
 		_, _ = http.Post(path, "application/x-www-form-urlencoded", nil)
@@ -92,7 +118,7 @@ func getAuthorization(c *gin.Context) {
 	//})
 	_json := map[string]string{}
 	_ = c.BindJSON(&_json)
-	if model2.CheckState(_json["user_name"]) {
+	if model.CheckState(_json["user_name"]) {
 		c.Redirect(http.StatusPermanentRedirect, "/server/choose_scope")
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/login")
@@ -109,7 +135,7 @@ func _Authorization(c *gin.Context) {
 	// need the name of the user
 	json := map[string]string{}
 	_ = c.BindJSON(&json)
-	if model2.CheckState(json["user_name"]) {
+	if model.CheckState(json["user_name"]) {
 		c.Redirect(http.StatusPermanentRedirect, "/server/choose_scope")
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, "/login")
@@ -133,7 +159,7 @@ func getAuthCode(c *gin.Context) {
 	code := c.Query("code")
 //	log.Println("code = " + code)
 	//	user_name, _ := c.Request.Cookie("username")
-	accessTokenInfo := model2.GenerateAccessToken(code, 50)
+	accessTokenInfo := model.GenerateAccessToken(code, 50)
 	log.Println("accesstoken" + accessTokenInfo.AccessToken)
 	var data = sendAccessToken{
 		accessTokenInfo.AccessToken,
@@ -160,7 +186,7 @@ func sendAuthCode(c *gin.Context) {
 }
 
 func getClientInfo(c *gin.Context) {
-	json := model2.RequestPermission{}
+	json := model.RequestPermission{}
 	_ = c.BindJSON(&json)
 	loginId := json.LoginId
 	password := json.Password
@@ -176,25 +202,24 @@ func getClientInfo(c *gin.Context) {
 }
 
 func getAuthorizationEndpoint(c *gin.Context) {
-	// need something
-	//responseType := c.Query("responsetype")
-	//if responseType != "200" {
-	//	c.Redirect(http.StatusMovedPermanently, "localhost:9090/HomePage")
-	//}
 	client_id := c.Query("client_id")
 	scope := c.Query("scope")
 	expire := c.Query("expire")
-	code := model2.GenerateTempAuthCode(client_id)
-	log.Println(code)
-	if isLogin(client_id, c) { // use cookie
-		//wordList, _ := generate.GenRandomMix(10)
-		//code := wordList.Chance
-		// store authzcode in db
-		model2.AuthCodeToUser(client_id, scope, expire, code)
-		path := "http://localhost:9090/HomePage?code="
+	code := model.GenerateTempAuthCode(client_id)
+//	log.Println(code)
+	resp, _ := http.Get("http://localhost:9090/login/checkcookie")
+	response, _ := ioutil.ReadAll(resp.Body)
+	log.Printf("response: %s", string(response))
+	_, err := c.Request.Cookie("username")
+
+//	if isLogin(client_id, c) { // use cookie
+	if err == nil {
+		model.AuthCodeToUser(client_id, scope, expire, code)
+		path := "http://localhost:9091/HomePage?code="
 		path += code
 		log.Println(path)
-		c.Redirect(http.StatusMovedPermanently, path)
+		http.Redirect(c.Writer, c.Request, path, http.StatusPermanentRedirect)
+//		c.Redirect(http.StatusMovedPermanently, path)
 	} else {
 		// you have to login first
 		c.Redirect(http.StatusMovedPermanently, "http://localhost:9090/login")

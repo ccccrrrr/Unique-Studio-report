@@ -1,67 +1,49 @@
 package controller
 
 import (
-	model2 "awesomeproject1/service/model"
+	"awesomeproject1/service/model"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"time"
+	"os"
 )
 
-var (
-	base_path = "~/Desktop/picture_store"
-	UserName string
-	UserPassword string
-)
-
-//type TotalInformation struct {
-//	PictureInfo model.Picture
-//	UserInfo 	model.Picture
-//}
-
-
-func PictureStore(server *gin.Engine){
+func PictureStore(server *gin.Engine) {
 	server.GET("/picture", BasicPicturePage)
-	server.PUT("/picture", getPicture)
-//	server.POST("/picture", getUserInfo)
-	server.GET("/picture/manage", UploadPicture)
+	server.POST("/picture", managePicture)
 }
 
-
-func getPicture(c *gin.Context) {
-
-	json := model2.Picture{}
-	_ = c.BindJSON(&json)
-
-	// I don't know why the time is not stored in mysql
-	//json.CreateTime = time.Now()
-	log.Println(json)
-	u := model2.User{
-		UserName:      json.CreateUserName,
-		UserPassword:  json.CreateUserPassword,
-		LastLoginTime: time.Now(),
+func managePicture(c *gin.Context) {
+	if Username == ""{
+		c.HTML(http.StatusOK, "not-login.html", nil)
+		return
 	}
-	// need to judge if the same picture has been stored
-	if model2.Login(u) {
-		// need to reorganize the picture
-		model2.Db.Table("pictures").Create(json)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "upload successfully",
-		})
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "wrong password or the login is out of date. you have to log in first",
-		})
+	choice := c.PostForm("submit")
+	switch choice {
+	case "delete": 
+		picture_name := c.PostForm("picture_name")
+		os.RemoveAll("/home/ccrr/go/src/awesomeProject/picture_store/" + picture_name)
+		model.DeletePicture(picture_name, Username)
+	case "add":
+		f, err := c.FormFile("picture")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		name := f.Filename
+		dst := "/home/ccrr/go/src/awesomeProject1/picture_store/" + f.Filename
+		err = c.SaveUploadedFile(f, dst)
+		if err != nil {
+			log.Printf("file store error: %v", err)
+			return
+		}
+		model.Upload(name, Username)
+	case "show":
+		model.Show(Username)
 	}
-}
-
-func BasicPicturePage(c *gin.Context){
 	c.HTML(http.StatusOK, "picture-store.html", nil)
 }
 
-func UploadPicture(c *gin.Context){
-	pictureInfo := model2.Picture{}
-	_ = c.BindJSON(&pictureInfo)
-	model2.Upload(base_path, pictureInfo)
-	c.Redirect(http.StatusPermanentRedirect, "/picture")
+func BasicPicturePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "picture-store.html", nil)
 }

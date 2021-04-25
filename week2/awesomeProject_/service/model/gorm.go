@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 )
 
 type DeleteInfo struct {
@@ -35,27 +34,6 @@ func StartDatabase() {
 
 }
 
-func DeletePicture(picture DeleteInfo) bool {
-	tmp := Picture{}
-	log.Println("yes")
-	log.Println(picture)
-	// therefore we must search for every picture in the
-	if err := Db.Table("pictures").Where("name = ?", picture.DeletePictureName).First(&tmp).Error; err == nil{
-		log.Println(tmp)
-
-		Db.Table("pictures").Delete(&tmp)
-		//for _, info := range tmp {
-		//	log.Println(info)
-		//	if info.CreateUserName == picture.DeleteUser {
-		//		Db.Table("pictures").Delete(&info)
-		//		return true
-		//	}
-		//}
-		return true
-	}
-	return false
-}
-
 func InsertAuthCodeInfo(authInfo AuthInfo) {
 	var tmp AuthInfo
 	if err := Db.Where("user_name = ?", authInfo.UserName).First(&tmp).Error; err != nil {
@@ -66,5 +44,15 @@ func InsertAuthCodeInfo(authInfo AuthInfo) {
 	}else {
 		//
 		Db.Create(&authInfo)
+	}
+}
+
+func IsValidToken(accessToken string) bool {
+	var temp AccessTokenInfo
+	// need to verify expire time
+	if err := Db.Where("access_token = ?", accessToken).First(&temp).Error; err != nil {
+		return false
+	}else {
+		return true
 	}
 }

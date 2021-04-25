@@ -1,13 +1,19 @@
 package controller
 
 import (
+	"awesomeproject1/thirdparty/model"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"time"
 )
-var _verify tempAccess
+var (
+	_verify AccessTokenInfo
+	access_token string
+	client_id string
+)
 
-type tempAccess struct {
+type AccessTokenInfo struct {
 	ExpireTime  time.Time `json:"expire_time"`
 	UserName    string    `json:"user_name"`
 	AccessToken string    `json:"access_token"`
@@ -18,9 +24,35 @@ type tempAccess struct {
 func ThirdParty(app *gin.Engine) {
 	app.GET("/HomePage", getAppHomePage)
 //	app.DELETE("/HomePage", deletePicture)
-	app.POST("/HomePage", uploadPicture)
-//	app.GET("/HomePage/getAuth", getgetAuthPage)
-//	app.POST("/HomePage/getAuth", receiveInfo)
+	app.PUT("/HomePage", getAccessToken)
+	app.POST("/HomePage", PictureOperation)
+	app.GET("/HomePage/getAuth", getAuthPage)
+	app.POST("/HomePage/getAuth", sendAuthzInfo)
+}
+
+func getAuthPage(c *gin.Context){
+	c.HTML(http.StatusOK, "app-getAuth.html", nil)
+}
+func sendAuthzInfo(c *gin.Context){
+	_client_id := c.PostForm("client_id")
+	scope := c.PostForm("scope")
+	expire := c.PostForm("expire")
+	path := "http://localhost:9090/server/authorization_endpoint" +
+	"?client_id=" + _client_id +
+	"&scope=" + scope +
+	"&expire=" + expire
+	log.Println("get path: " + path)
+	_, _ = http.Get(path)
+//	http.Redirect(c.Writer, c.Request, "http://localhost:9001/HomePage", http.StatusPermanentRedirect)
+//	c.Redirect(http.StatusPermanentRedirect, "/HomePage")
+	c.HTML(http.StatusOK, "app-getAuth.html", nil)
+}
+
+func getAccessToken(c *gin.Context){
+	// two choice
+	var info AccessTokenInfo
+	_ = c.BindJSON(&info)
+	_verify = info
 }
 //
 //func receiveInfo(c *gin.Context) {
@@ -71,7 +103,24 @@ func ThirdParty(app *gin.Engine) {
 //	}
 //}
 
-func uploadPicture(c *gin.Context) {
+func PictureOperation(c *gin.Context) {
+	http.Post("http://localhost:9090/server/isValidToken?token=" + _verify.AccessToken,"text", nil)
+	if _verify.AccessToken == ""{
+		log.Println("this is not a valid access token!")
+		return
+	}
+	operation := c.PostForm("submit")
+	if operation == "delete" {
+		picturePath := c.PostForm("picture_path")
+		model.SendDelete(picturePath, _verify.AccessToken)
+	}else if operation == "show" {
+		model.SendShow(_verify.AccessToken)
+	}else if operation == "add" {
+		picturePath := c.PostForm("picture_path")
+		model.SendAdd(picturePath, _verify.AccessToken)
+	}else {
+
+	}
 	//if c.ContentType() == "application/json;charset=UTF-8" {
 	//	_verify.ExpireTime, _ = time.Parse(time.RFC3339, c.Query("expireIn"))
 	//	_verify.Scope = c.Query("scope")

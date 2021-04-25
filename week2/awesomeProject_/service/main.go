@@ -1,8 +1,8 @@
 package main
 
 import (
-	controller2 "awesomeproject1/service/controller"
-	model2 "awesomeproject1/service/model"
+	"awesomeproject1/service/controller"
+	"awesomeproject1/service/model"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -43,7 +43,7 @@ func main() {
 
 	server := gin.Default()
 //	app := gin.Default()
-	model2.StartDatabase()
+	model.StartDatabase()
 	server.LoadHTMLGlob("./service/static/html/*")
 	//db, err := gorm.Open("mysql", "root: @(localhost:3306)/db1?charset=utf8mb4&parseTime=True&loc=Local")
 
@@ -58,10 +58,10 @@ func main() {
 	//defer db.Close()
 
 	// need client id verify
-	controller2.Authorization(server)
-	controller2.Login(server)
-	controller2.PictureStore(server)
-//	controller2.ThirdParty(server)
+	controller.Authorization(server)
+	controller.Login(server)
+	controller.PictureStore(server)
+//	controller.ThirdParty(server)
 /*	server.GET("/server/authorization_endpoint", func(c *gin.Context) {
 
 		// Tells the authorization server which grant to execute

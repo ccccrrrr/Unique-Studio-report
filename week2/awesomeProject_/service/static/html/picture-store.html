@@ -17,13 +17,17 @@
 
 </script>
 <body>
-  <form enctype="multipart/form-data" method="post">
-    <div id="preview"></div>
-    picture:<input type="file"><br />
-    <input type="submit" value="submit">
-  </form>
-    <div>
-        <a href="http://localhost:9090/HomePage">this is a third party link</a>
-    </div>
+<form method="post" enctype="multipart/form-data">
+    picture name:<input type="text" name="picture_name"><br/>
+    <input type="file" name="picture"><br/>
+    <input type="submit" name="submit" value="add">
+</form>
+<form method="post">
+    <input type="submit" name="submit" value="show">
+</form>
+<form method="post">
+    <input type="text" name="picture_name"><br/>
+    <input type="submit" name="submit" value="delete">
+</form>
 </body>
 </html>
