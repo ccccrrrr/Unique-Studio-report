@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>getAuth</title>
+</head>
+<body>
+<div>
+  authorize information...<br/>
+<!--    localhost:9090/server/authorization_endpoint?client_id=zht&scope=read&expire=20-->
+    <form method="post">
+        client_id<input name="client_id" type="text"><br />
+        scope<input name="scope" type="text"><br />
+        expire<input name="expire" type="text"><br/>
+        <input type="submit" name="submit" value="submit">
+    </form>
+    <a href="http://localhost:9001/HomePage"> back to home page</a>
+<!--  <div>-->
+<!--    {<br/>-->
+<!--      "scope": ...,<br/>-->
+<!--      "client_id":...,<br/>-->
+<!--      "time_limit":...,<br/>-->
+<!--    }-->
+<!--  </div>-->
+</div>
+</body>
+</html>
