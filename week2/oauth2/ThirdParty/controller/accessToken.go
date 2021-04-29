@@ -22,6 +22,6 @@ func getToken(context *gin.Context) {
 	}
 	model.InsertAccessTokenInfo(accessTokenInfo)
 	log.Println("successfully get token")
-	context.JSON(http.StatusOK, gin.H{"message": "successfully get token"})
+	context.JSON(http.StatusOK, gin.H{"message": "successfully get token, you can go back to home page"})
 }
 

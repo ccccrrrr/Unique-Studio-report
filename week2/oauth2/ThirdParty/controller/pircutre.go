@@ -28,10 +28,8 @@ func PictureCRUD(context *gin.Context) {
 		}
 
 		req, _ := http.NewRequest(http.MethodGet, "http://localhost:9090/picture", nil)
-
 		req.Header.Add("access_token", accessTokenInfo.AccessToken)
-
-		http.DefaultClient.Do(req)
+		_, _ = http.DefaultClient.Do(req)
 		context.HTML(http.StatusOK, "picture.html", nil)
 		return
 	}
@@ -48,7 +46,7 @@ func PictureCRUD(context *gin.Context) {
 
 		req.Header.Add("access_token", accessTokenInfo.AccessToken)
 		req.Header.Add("picture_name", picture_name)
-		http.DefaultClient.Do(req)
+		_, _ = http.DefaultClient.Do(req)
 		context.HTML(http.StatusOK, "picture.html", nil)
 		return
 	}
