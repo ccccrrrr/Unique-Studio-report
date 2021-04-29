@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/ccrr/Desktop/mission/t1/build",
-  "command": "/usr/bin/gcc   -g -o CMakeFiles/hello.dir/main.c.o -c /home/ccrr/Desktop/mission/t1/main.c",
-  "file": "/home/ccrr/Desktop/mission/t1/main.c"
-}
-]

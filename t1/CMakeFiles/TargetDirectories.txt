@@ -1,3 +1,0 @@
-/home/ccrr/Desktop/mission/t1/CMakeFiles/rebuild_cache.dir
-/home/ccrr/Desktop/mission/t1/CMakeFiles/edit_cache.dir
-/home/ccrr/Desktop/mission/t1/CMakeFiles/hello.dir
