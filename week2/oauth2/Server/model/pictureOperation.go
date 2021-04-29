@@ -56,3 +56,15 @@ func DeletePicture(picture_name string, username string) error {
 	}
 	return errors.New("no picture name match.")
 }
+
+func SearchPicture(username string) error {
+	var pictures []Picture
+	if err := DB_server.Where("create_user = ?", username).Find(&pictures).Error; err != nil {
+		log.Println(err)
+		return err
+	}
+	for _, info := range pictures {
+		log.Println(info)
+	}
+	return nil
+}

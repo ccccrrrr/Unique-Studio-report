@@ -1,8 +1,12 @@
 package model
 
 import (
+	"errors"
 	"github.com/thanhpk/randstr"
 	"gorm.io/gorm"
+	"log"
+	"strconv"
+	"time"
 )
 
 type AccessTokenInfo struct {
@@ -33,4 +37,66 @@ func GenerateAccessToken(authzCode string, redirect_uri string) (*AccessTokenInf
 func InsertAccessTokenInfo(info *AccessTokenInfo) bool {
 	DB_server.Create(info)
 	return true
+}
+
+func IsValidToken(access_token string) (*AccessTokenInfo, error) {
+	var temp *AccessTokenInfo
+	if err := DB_server.Where("access_token = ?", access_token).First(&temp).Error; err != nil {
+		return nil, err
+	}
+	expire_time, _ := strconv.Atoi(temp.ExpireTime)
+	if time.Now().After(temp.CreatedAt.Add(time.Minute * time.Duration(expire_time))) {
+		return nil, errors.New("access token has expired")
+	}
+	return temp, nil
+}
+
+func GetInfoInAccessToken(access_token string) (*AccessTokenInfo, error) {
+	var temp * AccessTokenInfo
+	if err := DB_server.Where("access_token = ?", access_token).First(&temp).Error; err != nil {
+		return nil, err
+	}
+	return temp, nil
+}
+
+func IsValidDeleteOperation(access_token string) bool {
+	info, err := GetInfoInAccessToken(access_token)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	if info.Scope == "read-write" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsValidUploadOperation(access_token string) bool {
+	info, err := GetInfoInAccessToken(access_token)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	if info.Scope == "read-write" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsValidGetOperation(access_token string) bool {
+	info, err := GetInfoInAccessToken(access_token)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	if info.Scope == "read-write" || info.Scope == "read" {
+		return true
+	} else {
+		return false
+	}
 }

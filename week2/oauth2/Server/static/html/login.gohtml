@@ -14,8 +14,8 @@
 <div> wrong password or name! </div>
 {{ else if eq .message 1}}
 <div> login successfully !</div>
-<div> click here to choose your authorization</div>
-<a href="http://localhost:9090/authz_code">authorization_process</a>
+<div> you can go back to get authorization</div>
+<a href="http://localhost:9090/auth-and-login">get authorization link</a>
 {{ else if eq .message 2}}
     <div> you have login! </div>
 {{ end }}
