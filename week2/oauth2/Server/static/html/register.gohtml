@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    username<input name="username" type="text"><br />
+    userpassword<input name="userpassword" type="password"><br />
+    <input type="submit" name="submit" value="submit">
+</form>
+{{ if eq .message 0 }}
+    <div> already has the user </div>
+{{ else if eq .message 1}}
+<div> register successfully !</div>
+{{ end }}
+<div> if you do not have registered, click here to log in</div>
+<a href="http://localhost:9090/login">login link</a>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{{ if eq .message -1 }}
+    <div>you have not log in, please log in first or register</div>
+    <form method="post">
+    username<input name="username" type="text"><br />
+    userpassword<input name="userpassword" type="password"><br />
+    <input type="submit" name="submit" value="login"><br/>
+    </form>
+    <a href="http://localhost:9090/register">register link</a>
+{{ else }}
+    <div>hello, you have logged in</div>
+        <div> configuration:</div>
+<form method="post">
+    your scope: <input type="text" name="scope"><br/>
+    your expire limit: <input type="text" name="expire"><br/>
+    redirect_uri <input type="text" name="redirect_uri" value="http://localhost:9001/home/getAuth/success"><br/>
+    <input type="submit" name="submit" value="verify"><br/>
+</form>
+{{ end }}
+</body>
+</html>

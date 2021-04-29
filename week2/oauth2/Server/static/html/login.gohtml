@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    username<input name="username" type="text"><br />
+    userpassword<input name="userpassword" type="password"><br />
+    <input type="submit" name="submit" value="submit">
+</form>
+{{ if eq .message 0 }}
+<div> wrong password or name! </div>
+{{ else if eq .message 1}}
+<div> login successfully !</div>
+<div> click here to choose your authorization</div>
+<a href="http://localhost:9090/authz_code">authorization_process</a>
+{{ else if eq .message 2}}
+    <div> you have login! </div>
+{{ end }}
+<div> if you do not have account, click here to register first</div>
+<a href="http://localhost:9090/register">register link</a>
+</body>
+</html>
