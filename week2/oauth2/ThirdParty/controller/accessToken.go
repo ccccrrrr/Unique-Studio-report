@@ -8,9 +8,6 @@ import (
 	"oauth2/ThirdParty/model"
 )
 
-const AccessToken_RedirectUri = "http://localhost:9001/homepage/getToken"
-const ExpireTime = 20
-
 func AccessToken(app *gin.Engine) {
 	app.POST("homepage/getToken", getToken)
 }

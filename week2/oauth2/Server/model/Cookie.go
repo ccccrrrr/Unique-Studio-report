@@ -5,18 +5,18 @@ import (
 	"log"
 )
 
-func CheckCookie(c *gin.Context, name string) (string, bool) {
+func CheckCookie(c *gin.Context, name string) (string, error) {
 	body, err := c.Request.Cookie(name)
 	if err != nil {
-		log.Println(err)
-		return "", false
+		return "", err
 	}
-	return body.Value, true
+	return body.Value, nil
 }
 
 func IsValidUserName(username string, c *gin.Context) bool {
-	_username, returnType := CheckCookie(c, "username")
-	if returnType == false {
+	_username, err := CheckCookie(c, "username")
+	if err != nil {
+		log.Println(err)
 		return false
 	}
 	if _username == username {

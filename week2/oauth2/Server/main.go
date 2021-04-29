@@ -19,9 +19,7 @@ func main() {
 	controller.PictureOperation(server)
 	controller.Register(server)
 	controller.AccessTokenEndpoint(server)
-	controller.IntrospectiveEndpoint(server)
 	controller.AuthAndLogin(server)
-//	controller.AuthzEndpoint(server)
 
 	_ = server.Run(":9090")
 }

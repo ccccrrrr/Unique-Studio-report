@@ -21,10 +21,10 @@ func InitServerDatabase() {
 		return
 	}
 
-	_db.AutoMigrate(&AuthzCodeInfo{})
-	_db.AutoMigrate(&AccessTokenInfo{})
-	_db.AutoMigrate(&UserInfo{})
-	_db.AutoMigrate(&Picture{})
+	_ = _db.AutoMigrate(&AuthzCodeInfo{})
+	_ = _db.AutoMigrate(&AccessTokenInfo{})
+	_ = _db.AutoMigrate(&UserInfo{})
+	_ = _db.AutoMigrate(&Picture{})
 
 	DB_server = _db
 

@@ -14,11 +14,6 @@ func PictureOperation(server *gin.Engine) {
 }
 
 func postPicture(context *gin.Context) {
-	//_, header, err := context.Request.FormFile("file")
-	//if err != nil {
-	//	log.Printf("form file error %v", err)
-	//	return
-	//}
 	access_token := context.GetHeader("access_token")
 	file_name := context.GetHeader("file_name")
 	res, err := model.IsValidToken(access_token)

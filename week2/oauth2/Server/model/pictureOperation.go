@@ -12,22 +12,10 @@ type Picture struct {
 	CreateUser  string `json:"create_user"`
 }
 
-func Show(user_name string) error {
-	var p1 []Picture
-	if err := DB_server.Table("pictures").Where("create_user_name = ?", user_name).Find(&p1).Error; err == nil {
-		for _, info := range p1 {
-			log.Println(info)
-		}
-	} else {
-		return err
-	}
-	return nil
-}
-
 func Upload(picture_name string, user_name string) bool {
 	var p1 []Picture
 	var p Picture
-	if err := DB_server.Table("pictures").Where("name = ?", picture_name).Find(&p1).Error; err == nil {
+	if err := DB_server.Table("pictures").Where("picture_name = ?", picture_name).Find(&p1).Error; err == nil {
 		log.Println(p1)
 		for _, info := range p1 {
 			if info.CreateUser == user_name {
@@ -39,13 +27,12 @@ func Upload(picture_name string, user_name string) bool {
 	p.PictureName= picture_name
 	p.CreateUser = user_name
 	DB_server.Table("pictures").Create(&p)
-
 	return true
 }
 
 func DeletePicture(picture_name string, username string) error {
 	var tmp []Picture
-	if err := DB_server.Table("pictures").Where("name = ?", picture_name).Find(&tmp).Error; err != nil {
+	if err := DB_server.Table("pictures").Where("picture_name = ?", picture_name).Find(&tmp).Error; err != nil {
 		return err
 	}
 		for _, info := range tmp {
@@ -54,7 +41,7 @@ func DeletePicture(picture_name string, username string) error {
 				return nil
 			}
 	}
-	return errors.New("no picture name match.")
+	return errors.New("[picture delete error] no picture name match.")
 }
 
 func SearchPicture(username string) error {

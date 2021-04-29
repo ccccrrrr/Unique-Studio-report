@@ -24,13 +24,14 @@ func GenerateAccessToken(authzCode string, redirect_uri string) (*AccessTokenInf
 	if returnType == false {
 		return nil, false
 	}
-	accessTokenInfo := AccessTokenInfo{}
-	accessTokenInfo.AuthzCode = authzCode
-	accessTokenInfo.Scope = authzCodeInfo.Scope
-	accessTokenInfo.RedirectUri = authzCodeInfo.RedirectUri
-	accessTokenInfo.ExpireTime = authzCodeInfo.ExpireTime
-	accessTokenInfo.UserName = authzCodeInfo.UserName
-	accessTokenInfo.AccessToken = randstr.Hex(20)
+	accessTokenInfo := AccessTokenInfo{
+		AuthzCode: authzCode,
+		Scope: authzCodeInfo.Scope,
+		RedirectUri: authzCodeInfo.RedirectUri,
+		ExpireTime: authzCodeInfo.ExpireTime,
+		UserName: authzCodeInfo.UserName,
+		AccessToken: randstr.Hex(20),
+	}
 	return &accessTokenInfo, true
 }
 

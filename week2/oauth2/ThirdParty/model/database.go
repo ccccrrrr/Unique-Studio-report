@@ -22,8 +22,8 @@ func InitDataBase() {
 		return
 	}
 
-	_db.AutoMigrate(&model2.AccessTokenInfo{})
-	_db.AutoMigrate(&AuthCodeInfo{})
+	_ = _db.AutoMigrate(&model2.AccessTokenInfo{})
+	_ = _db.AutoMigrate(&AuthCodeInfo{})
 
 	appDB = _db
 

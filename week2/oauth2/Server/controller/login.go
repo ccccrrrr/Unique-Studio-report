@@ -26,8 +26,8 @@ func loginOperation(context *gin.Context) {
 }
 
 func getLoginPage(context *gin.Context) {
-	_, returnValue := model.CheckCookie(context, "username")
-	if returnValue == false {
+	_, err := model.CheckCookie(context, "username")
+	if err != nil {
 		context.HTML(http.StatusOK, "login.gohtml", gin.H{"message": -1})
 	} else {
 		context.HTML(http.StatusOK, "login.gohtml", gin.H{"message": 2})

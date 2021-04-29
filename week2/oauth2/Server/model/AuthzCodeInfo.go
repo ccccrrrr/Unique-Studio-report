@@ -26,14 +26,6 @@ func GenerateAuthzCode(username string, scope string, expire string, redirectUri
 	return temp, true
 }
 
-func GetUsernameInAuthCode(auth_code string) (string, bool) {
-	return "", true
-}
-
-func GetAuthCodeInUsername(user_name string) (string, bool) {
-	return "", true
-}
-
 func StoreAuthCodeInfo(user AuthzCodeInfo) bool {
 	DB_server.Create(&user)
 	return true
@@ -46,7 +38,7 @@ func CheckAuthzCode(code string) bool {
 		if time.Now().After(temp.CreatedAt.Add(time.Duration(expire_time) * time.Minute)) {
 			DB_server.Delete(&temp)
 			return false
-		}else {
+		} else {
 			return true
 		}
 	}

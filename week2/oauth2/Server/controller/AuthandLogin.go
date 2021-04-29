@@ -18,7 +18,7 @@ func VerifyInfo(c *gin.Context) {
 		user_name := c.PostForm("username")
 		user_password := c.PostForm("userpassword")
 		if model.IsValid(model.UserInfo{UserName: user_name,UserPassword: user_password}) {
-			c.SetCookie("username", user_name, 20, "/", "localhost", false, true)
+			c.SetCookie("username", user_name, ExpireTime, "/", "localhost", false, true)
 			c.HTML(http.StatusOK, "auth-and-login.gohtml", gin.H{"message": 1})
 		}
 	}else {
@@ -32,7 +32,7 @@ func VerifyInfo(c *gin.Context) {
 		redirect_uri := c.PostForm("redirect_uri")
 		authCodeInfo, _ := model.GenerateAuthzCode(info.Value, scope, expire_time, redirect_uri)
 		model.StoreAuthCodeInfo(authCodeInfo)
-		c.Redirect(302, redirect_uri + "?code=" + authCodeInfo.AuthCode)
+		c.Redirect(http.StatusFound, redirect_uri + "?code=" + authCodeInfo.AuthCode)
 	}
 }
 

@@ -9,6 +9,7 @@ func InsertAccessTokenInfo(info model2.AccessTokenInfo) bool {
 	return true
 }
 
+// GetNewestAccessTokenInfo just use latest access_token received from server
 func GetNewestAccessTokenInfo() (*model2.AccessTokenInfo, error) {
 	var temp model2.AccessTokenInfo
 	if err := appDB.Table("access_token_infos").Last(&temp).Error; err != nil {

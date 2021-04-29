@@ -12,6 +12,7 @@ type AuthCodeInfo struct {
 	AuthzCode string `json:"authz_code" gorm:"column:authz_code"`
 	UserName  string `json:"user_name" gorm:"user_name"`
 }
+
 func InsertAuthCodeInfo(authcodeinfo AuthCodeInfo) bool {
 	appDB.Create(&authcodeinfo)
 	return true

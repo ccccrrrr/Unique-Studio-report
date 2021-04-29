@@ -30,7 +30,6 @@ func getAuthCode(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 	}else {
 		model.InsertAccessTokenInfo(accessTokenInfo)
-//		_, _ = http.Post()
 		c.JSON(http.StatusOK, accessTokenInfo)
 	}
 }
